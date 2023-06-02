@@ -44,8 +44,9 @@ export const ChartComponent = () => {
 
 
   var chart = LightweightCharts.createChart(chartElement, {
-    width: 600,
-    height: 300,
+    // width: 1000,
+    height: 600,
+    autoSize: true,
     rightPriceScale: {
       scaleMargins: {
         top: 0.3,
