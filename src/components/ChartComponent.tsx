@@ -39,8 +39,9 @@ function createSimpleSwitcher(items: any, activeItem: any, activeItemChangedCall
 
 export const ChartComponent = () => {
   var intervals = ['1D', '1W', '1M', '1Y'];
-
   var chartElement = document.createElement('div');
+  chartElement.classList.add('chart');
+
 
   var chart = LightweightCharts.createChart(chartElement, {
     width: 600,
@@ -54,17 +55,16 @@ export const ChartComponent = () => {
     },
     layout: {
       background: {
-        // type: "gradient",
-        color: '#131722',
+        color: '#ffffff',
       },
-      textColor: '#d1d4dc',
+      textColor: '#333',
     },
     grid: {
-      vertLines: {
-        color: 'rgba(42, 46, 57, 0)',
-      },
       horzLines: {
-        color: 'rgba(42, 46, 57, 0.6)',
+        color: '#eee',
+      },
+      vertLines: {
+        color: '#ffffff',
       },
     },
     timeScale: {
@@ -72,18 +72,16 @@ export const ChartComponent = () => {
     },
     crosshair: {
       horzLine: {
-        visible: false,
+        visible: true,
+        labelVisible: true
       },
+      vertLine: {
+        visible: true,
+        labelVisible: true,
+      }
     },
   });
-
-  // var areaSeries = chart.addAreaSeries({
-  //   topColor: 'rgba(38,198,218, 0.56)',
-  //   bottomColor: 'rgba(38,198,218, 0.04)',
-  //   lineColor: 'rgba(38,198,218, 1)',
-  //   lineWidth: 2,
-  // });
-
+  
   var volumeSeries = chart.addHistogramSeries({
     color: '#26a69a',
     priceFormat: {
@@ -123,15 +121,67 @@ export const ChartComponent = () => {
       chart.removeSeries(areaSeries);
       areaSeries = null;
     }
+
     areaSeries = chart.addAreaSeries({
-      topColor: 'rgba(76, 175, 80, 0.56)',
-      bottomColor: 'rgba(76, 175, 80, 0.04)',
-      lineColor: 'rgba(76, 175, 80, 1)',
+      topColor: 'rgba(255, 82, 82, 0.56)',
+      bottomColor: 'rgba(255, 82, 82, 0.04)',
+      lineColor: 'rgba(255, 82, 82, 1)',
       lineWidth: 2,
     });
     areaSeries.setData(seriesesData.get(interval));
-  }
 
+    const toolTipWidth = 80;
+    const toolTipHeight = 80;
+    const toolTipMargin = 15;
+
+    const toolTip: any = document.createElement('div');
+    toolTip.classList.add('tool-tip');
+    toolTip.style = `width: 96px; height: 80px; position: absolute; display: none; padding: 8px; box-sizing: border-box; font-size: 12px; text-align: left; z-index: 1000; top: 12px; left: 12px; pointer-events: none; border: 1px solid; border-radius: 2px;font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;`;
+    toolTip.style.background = 'white';
+    toolTip.style.color = 'black';
+    toolTip.style.borderColor = 'rgba(255, 82, 82, 1)';
+    chartElement.appendChild(toolTip);
+
+    // update tooltip
+    chart.subscribeCrosshairMove(param => {
+      if (
+        param.point === undefined ||
+        !param.time ||
+        param.point.x < 0 ||
+        param.point.x > chartElement.clientWidth ||
+        param.point.y < 0 ||
+        param.point.y > chartElement.clientHeight
+      ) {
+        toolTip.style.display = 'none';
+      } else {
+        // time will be in the same format that we supplied to setData.
+        // thus it will be YYYY-MM-DD
+        const dateStr = param.time;
+        toolTip.style.display = 'block';
+        const data: any = param.seriesData.get(areaSeries);
+        const price = data?.value !== undefined ? data?.value : data?.close;
+        toolTip.innerHTML = `<div style="color: ${'rgba(255, 82, 82, 1)'}">ABC Inc.</div><div style="font-size: 24px; margin: 4px 0px; color: ${'black'}">
+			${Math.round(100 * price) / 100}
+			</div><div style="color: ${'black'}">
+			${dateStr}
+			</div>`;
+
+        const y = param.point.y;
+        let left = param.point.x + toolTipMargin;
+        if (left > chartElement.clientWidth - toolTipWidth) {
+          left = param.point.x - toolTipMargin - toolTipWidth;
+        }
+
+        let top = y + toolTipMargin;
+        if (top > chartElement.clientHeight - toolTipHeight) {
+          top = y - toolTipHeight - toolTipMargin;
+        }
+        toolTip.style.left = left + 'px';
+        toolTip.style.top = top + 'px';
+      }
+    });
+
+  }
   syncToInterval(intervals[0]);
 
   return null;
