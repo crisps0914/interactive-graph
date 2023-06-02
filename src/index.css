@@ -56,6 +56,7 @@ body {
 	background: #f9fafb;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	padding-top: 50px;
 }
 
 .floating-tooltip-2 {
@@ -75,4 +76,17 @@ body {
 	pointer-events: none;
 	border: 1px solid rgba(255, 70, 70, 1);
 	border-radius: 2px;
+}
+
+.chart{
+	width: 45%;
+    margin: auto;
+	padding:10px;
+	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.switcher{
+	width: 45%;
+    margin: auto;
+	padding:10px;
 }
